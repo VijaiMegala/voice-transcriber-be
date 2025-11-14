@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class TranscriptDto {
   @ApiProperty({
@@ -17,4 +17,13 @@ export class TranscriptDto {
   @IsNotEmpty()
   @IsString()
   transcript: string;
+
+  @ApiProperty({
+    description: 'Language code of the transcript (ISO 639-1 format)',
+    example: 'en',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  language?: string;
 }

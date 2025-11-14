@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsIn } from 'class-validator';
 
 export class GenerateTokenDto {
   @ApiProperty({
@@ -17,4 +17,32 @@ export class GenerateTokenDto {
   @IsNotEmpty()
   @IsString()
   participantName: string;
+
+  @ApiProperty({
+    description:
+      'Language code for transcription (ISO 639-1 format). Use "multi" for automatic language detection. Supported: en, es, fr, de, it, pt, nl, zh, ja, ko, id, tr, ru, hi, multi',
+    example: 'en',
+    required: false,
+    default: 'en',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn([
+    'en',
+    'es',
+    'fr',
+    'de',
+    'it',
+    'pt',
+    'nl',
+    'zh',
+    'ja',
+    'ko',
+    'id',
+    'tr',
+    'ru',
+    'hi',
+    'multi',
+  ])
+  language?: string;
 }

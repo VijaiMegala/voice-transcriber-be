@@ -55,13 +55,16 @@ export class AppController {
   async generateToken(
     @Body() body: GenerateTokenDto,
   ): Promise<TokenResponseDto> {
+    const language = body.language || 'en';
     const token = await this.appService.generateLiveKitToken(
       body.roomName,
       body.participantName,
+      language,
     );
     return {
       token,
       roomName: body.roomName,
+      language,
     };
   }
 
@@ -86,9 +89,14 @@ export class AppController {
     // Store transcript chunks as they come in
     this.appService.storeTranscript(body.roomName, body.transcript);
 
+    // Get language for this room (use provided language or stored preference)
+    const language =
+      body.language || this.appService.getRoomLanguage(body.roomName);
+
     // Process with GROQ if needed
     const processed = await this.appService.processTranscriptWithGroq(
       body.transcript,
+      language,
     );
 
     return {
@@ -124,9 +132,14 @@ export class AppController {
       };
     }
 
+    // Get language for this room
+    const language = this.appService.getRoomLanguage(body.roomName);
+
     // Process the final transcript with GROQ
-    const processed =
-      await this.appService.processTranscriptWithGroq(transcript);
+    const processed = await this.appService.processTranscriptWithGroq(
+      transcript,
+      language,
+    );
 
     // Clear the stored transcript
     this.appService.clearTranscript(body.roomName);

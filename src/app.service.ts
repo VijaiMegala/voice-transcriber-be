@@ -8,6 +8,7 @@ dotenv.config();
 export class AppService {
   private groqClient: Groq | null = null;
   private transcriptStore: Map<string, string> = new Map();
+  private roomLanguageStore: Map<string, string> = new Map();
 
   constructor() {
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -27,6 +28,7 @@ export class AppService {
   async generateLiveKitToken(
     roomName: string,
     participantName: string,
+    language: string = 'en',
   ): Promise<string> {
     const apiKey = process.env.LIVEKIT_API_KEY;
     const apiSecret = process.env.LIVEKIT_API_SECRET;
@@ -35,8 +37,12 @@ export class AppService {
       throw new Error('LiveKit API key or secret is not configured');
     }
 
+    // Store language preference for this room
+    this.roomLanguageStore.set(roomName, language);
+
     const at = new AccessToken(apiKey, apiSecret, {
       identity: participantName,
+      metadata: JSON.stringify({ language }),
     });
 
     at.addGrant({
@@ -50,7 +56,14 @@ export class AppService {
     return await at.toJwt();
   }
 
-  async processTranscriptWithGroq(text: string): Promise<string> {
+  getRoomLanguage(roomName: string): string {
+    return this.roomLanguageStore.get(roomName) || 'en';
+  }
+
+  async processTranscriptWithGroq(
+    text: string,
+    language: string = 'en',
+  ): Promise<string> {
     // Don't process empty or whitespace-only transcripts
     if (!text || !text.trim()) {
       return text;
@@ -61,18 +74,43 @@ export class AppService {
     }
 
     try {
+      // Map language codes to language names for better context
+      const languageNames: Record<string, string> = {
+        en: 'English',
+        es: 'Spanish',
+        fr: 'French',
+        de: 'German',
+        it: 'Italian',
+        pt: 'Portuguese',
+        nl: 'Dutch',
+        zh: 'Chinese',
+        ja: 'Japanese',
+        ko: 'Korean',
+        id: 'Indonesian',
+        tr: 'Turkish',
+        ru: 'Russian',
+        hi: 'Hindi',
+        multi: 'multiple languages',
+      };
+
+      const languageName = languageNames[language] || 'English';
+      const isMultilingual = language === 'multi';
+
       // Use GROQ to enhance/process the transcript
       // Reference: https://console.groq.com/docs/text-chat
+      const systemPrompt = isMultilingual
+        ? 'You are a helpful assistant that improves and formats transcripts in multiple languages. Preserve the original language(s) and improve formatting, grammar, and clarity. Return only the improved transcript without any additional commentary. If the transcript is empty or meaningless, return it as-is.'
+        : `You are a helpful assistant that improves and formats transcripts in ${languageName}. Preserve the original language and improve formatting, grammar, and clarity. Return only the improved transcript without any additional commentary. If the transcript is empty or meaningless, return it as-is.`;
+
       const completion = await this.groqClient.chat.completions.create({
         messages: [
           {
             role: 'system',
-            content:
-              'You are a helpful assistant that improves and formats transcripts. Return only the improved transcript without any additional commentary. If the transcript is empty or meaningless, return it as-is.',
+            content: systemPrompt,
           },
           {
             role: 'user',
-            content: `Please improve and format this transcript: ${text}`,
+            content: `Please improve and format this transcript${isMultilingual ? ' (which may contain multiple languages)' : ` (in ${languageName})`}: ${text}`,
           },
         ],
         model: 'llama-3.3-70b-versatile',

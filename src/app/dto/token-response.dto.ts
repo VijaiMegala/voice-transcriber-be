@@ -12,4 +12,10 @@ export class TokenResponseDto {
     example: 'room-123',
   })
   roomName: string;
+
+  @ApiProperty({
+    description: 'Language code configured for transcription',
+    example: 'en',
+  })
+  language: string;
 }
