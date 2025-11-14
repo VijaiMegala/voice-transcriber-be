@@ -12,7 +12,7 @@ import { GenerateTokenDto } from './app/dto/generate-token.dto';
 import { TranscriptDto } from './app/dto/transcript.dto';
 import { FinalTranscriptDto } from './app/dto/final-transcript.dto';
 import { TokenResponseDto } from './app/dto/token-response.dto';
-import { TranscriptResponseDto } from './app/dto/transcript-response.dto';
+import { ProcessedTranscriptResponseDto } from './app/dto/transcript-response.dto';
 import { FinalTranscriptResponseDto } from './app/dto/final-transcript-response.dto';
 
 @ApiTags('app')
@@ -75,14 +75,14 @@ export class AppController {
   @ApiResponse({
     status: 201,
     description: 'Transcript received and processed successfully',
-    type: TranscriptResponseDto,
+    type: ProcessedTranscriptResponseDto,
   })
   @ApiBadRequestResponse({
     description: 'Invalid input data',
   })
   async receiveTranscript(
     @Body() body: TranscriptDto,
-  ): Promise<TranscriptResponseDto> {
+  ): Promise<ProcessedTranscriptResponseDto> {
     // Store transcript chunks as they come in
     this.appService.storeTranscript(body.roomName, body.transcript);
 

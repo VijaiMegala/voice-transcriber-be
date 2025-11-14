@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TranscriptResponseDto {
+export class ProcessedTranscriptResponseDto {
   @ApiProperty({
     description: 'Success status',
     example: true,
