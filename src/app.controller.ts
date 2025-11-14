@@ -65,11 +65,11 @@ export class AppController {
     };
   }
 
-  @Post('transcript')
+  @Post('livekit/transcript')
   @ApiOperation({
     summary: 'Receive and process transcript chunk',
     description:
-      'Receives a transcript chunk, stores it, and processes it with GROQ AI',
+      'Receives a transcript chunk from LiveKit, stores it, and processes it with GROQ AI',
   })
   @ApiBody({ type: TranscriptDto })
   @ApiResponse({
@@ -97,7 +97,7 @@ export class AppController {
     };
   }
 
-  @Post('transcript/final')
+  @Post('livekit/transcript/final')
   @ApiOperation({
     summary: 'Get final processed transcript',
     description:

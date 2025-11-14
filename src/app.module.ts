@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { dbConfig } from '../db/dbConfig';
+import { TranscriptModule } from './transcript/transcript.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { dbConfig } from '../db/dbConfig';
     }),
     TypeOrmModule.forRoot(dbConfig),
     AuthModule,
+    TranscriptModule,
   ],
   controllers: [AppController],
   providers: [AppService],
